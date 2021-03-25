@@ -1,0 +1,829 @@
+// OOP_Lesson_3.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+//
+
+#include <iostream>
+using namespace std;
+
+//============================================================================================================================================================
+//  Задание 1. 
+//  Создать абстрактный класс Figure (фигура). Его наследниками являются классы Parallelogram (параллелограмм) и Circle (круг).
+//  Класс Parallelogram — базовый для классов Rectangle (прямоугольник), Square (квадрат), Rhombus (ромб). Для всех классов создать конструкторы.
+//  Для класса Figure добавить чисто виртуальную функцию area() (площадь). Во всех остальных классах переопределить эту функцию, исходя из геометрических формул нахождения площади.
+
+
+
+double Calculate_the_area(double a, double h) // у фигур: Parallelogram, Rectangle, Square, Rhombus  S = a*h  //*у Rectangle h - это ширина -- S = a*b,  у Square a == h   S = a*a
+{
+    return a * h;
+};
+
+
+class IFigure  // абстрактный класс 
+{
+public:
+    //в абстрактном классе конструктор не создается. нельзя создавать объекты абс. класса.
+    virtual ~IFigure() {};
+
+    virtual void area() = 0;   // виртуальная функция area
+    virtual double get_area() = 0;
+    virtual void Print_Figure()const = 0;
+
+};
+
+class Parallelogram : public IFigure
+{
+protected:
+    double m_side;
+    double m_height;
+    double m_area;  
+    
+public:
+    Parallelogram() : m_side(0.0), m_height(0.0)
+    {};
+    Parallelogram(double side, double height) : m_side(side), m_height(height)
+    {};
+    ~Parallelogram()
+    {
+
+    };
+
+    
+
+    void area() override
+    {   
+        //S = a * h
+        m_area = Calculate_the_area(m_side, m_height);
+    };
+    double get_area() override
+    {
+        return  m_area;
+    };
+    void Print_Figure()const override
+    {
+        cout << "Area of the parallelogram: " << m_area << endl;
+    };
+
+};
+class Circle : public IFigure
+{
+private:
+
+  float m_radius;
+  float m_area;
+  const float Pi = 3.141;
+
+
+public:
+    Circle() : m_radius(0.0)
+    {};
+    Circle(float radius) : m_radius(radius)
+    {};
+    ~Circle()
+    {};
+
+    void area() override
+    {
+        //S=πR² 
+        m_area = Pi * m_radius * m_radius;
+    };
+    double get_area() override
+    {
+        return  m_area;
+    };
+
+    void Print_Figure() const override
+    {
+        cout << "Area of the Circle: " << m_area << endl;
+    };
+};
+
+class Rectangle : public Parallelogram
+{
+private:
+
+public:
+    Rectangle(double side, double height) : Parallelogram(side, height)
+    {};
+
+    ~Rectangle()
+    {
+
+    };
+    void area() override
+    {
+        //S=a*b
+        m_area = Calculate_the_area(m_side, m_height); // здесь m_height - сторона 
+
+    }
+    void Print_Figure()const override
+    {
+        cout << "Area of the Rectangle: " << m_area << endl;
+    };
+
+};
+class Square : public Parallelogram
+{
+private:
+    // double m_side; //для квадрата достаточно полуучить размер стороны.
+
+public:
+    Square(double side) : Parallelogram(side, side)
+    {};
+
+    ~Square()
+    {
+
+    };
+    void area() override
+    {
+        //S=a*a
+        m_area = Calculate_the_area(m_side, m_height); // здесь height == side
+    }
+    void Print_Figure()const override
+    {
+        cout << "Area of the Square: " << m_area << endl;
+    };
+};
+class Rhombus : public Parallelogram
+{
+private:
+
+public:
+    Rhombus(double side, double height) : Parallelogram(side, height)
+    {};
+
+    ~Rhombus()
+    {
+
+    };
+    void area() override 
+    {
+       // S = a*h
+        m_area = Calculate_the_area(m_side, m_height);
+    }
+
+    void Print_Figure()const override
+    {
+        cout << "Area of the Rhombus: " << m_area << endl;
+    };
+};
+
+
+void  area(IFigure* figure)
+{
+    figure->area();
+};
+void PrintFigure(IFigure* figure)
+{
+    figure->Print_Figure();
+};
+//============================================================================================================================================================
+
+//  Задание 2.
+//  Создать класс Car(автомобиль) с полями company(компания) и model(модель).Классы - наследники: PassengerCar(легковой автомобиль)
+//  и Bus(автобус).От этих классов наследует класс Minivan(минивэн).Создать конструкторы для каждого из классов, чтобы они выводили данные о классах.
+//  Создать объекты для каждого из классов и посмотреть, в какой последовательности выполняются конструкторы. Обратить внимание на проблему «алмаз смерти».
+//  Примечание : если использовать виртуальный базовый класс, то объект самого "верхнего" базового класса создает самый "дочерний" класс.
+
+class Car 
+{
+protected:
+    string company;
+    string model;
+    static int namber_car;  // просто счетчик того, сколько создано объектов автомобиль.
+
+public:
+    Car() : company("name_company"), model("name_model") // по умолчанию
+    {};
+    Car(string& comp, string& mdl) : company(comp), model(mdl)
+    {};
+
+    virtual ~Car()
+    {
+
+    }
+    virtual void print_vehicle_class_data() const = 0; // виртуальная функция которая бдет переопределена для каждого класса.   
+    
+};
+class PassengerCar :virtual public Car
+{
+protected:
+    
+    
+    bool trunk; // багажник уникально для легковой машины.   
+                // это уникальные эл-ты для каждого типа автомобиля. вообще они тоже долны принадлежать классу Car, 
+                // но чтобы увидеть что Minivan наследует корректно переменные из обоих классов реализовал так.
+
+
+public:
+    PassengerCar() : Car(), trunk(1)
+    {};
+    PassengerCar(string comp, string mdl, bool trunk) : Car(comp, mdl), trunk(trunk)
+    {
+        namber_car++;
+    };
+
+    ~PassengerCar()
+    {};
+
+    void print_vehicle_class_data() const
+    {   
+        cout << "Car namber: " << namber_car  << endl;
+        cout << "company name: " << company << endl;
+        cout << "model name: " << model << endl;
+        cout << "trunk " << trunk << endl;
+        cout << "vehicle type Passenger Car" << endl;
+        cout << endl;
+    };
+
+};
+class Bus : virtual public Car
+{
+protected:
+    //уникальные данные класса например кол-во мест
+    int number_of_seats;// большое количество мест уникально для автобуса.   
+                // это уникальные эл-ты для каждого типа автомобиля. вообще они тоже долны принадлежать классу Car, 
+                // но чтобы увидеть что Minivan наследует корректно переменные из обоих классов реализовал так.
+
+public:
+    Bus() : Car(), number_of_seats(100)
+    {};
+    Bus(string comp, string mdl, int number_of_seats) : Car(comp, mdl), number_of_seats(number_of_seats)
+    {
+        namber_car++;
+    };
+
+    ~Bus()
+    {};
+
+    void print_vehicle_class_data() const
+    {
+        cout << "Car namber: " << namber_car << endl;
+        cout << "company name: " << company << endl;
+        cout << "model name: " << model << endl;
+        cout << "number_of_seats: " << number_of_seats << endl;
+        cout << "vehicle type Bus" << endl;
+        cout << endl;
+    };
+
+};
+class Minivan : public PassengerCar, public Bus
+{
+protected:
+    //уникальные данные класса например кол-во мест
+    
+public:
+    Minivan(string comp, string mdl) :  Bus(comp, mdl,8) , PassengerCar(comp, mdl, 1)
+    {
+        namber_car++;
+    };
+
+    ~Minivan()
+    {};
+
+    void print_vehicle_class_data() const
+    {
+        cout << "Car namber: " << namber_car << endl;
+        cout << "company name: " << company << endl;
+        cout << "model name: " << model << endl;
+        cout << "number_of_seats: " << number_of_seats << endl;
+        cout << "trunk " << trunk << endl;
+        cout << "vehicle type Minivan" << endl;
+        cout << endl;
+    };
+
+};
+void  print_vehicle_class_data(Car* car)
+{
+    car->print_vehicle_class_data();
+};
+
+//============================================================================================================================================================
+// Задание 3.
+//   Создать класс : Fraction(дробь).Дробь имеет числитель и знаменатель(например, 3 / 7 или 9 / 2).Предусмотреть, чтобы знаменатель не был равен 0.
+//   Перегрузить :   математические бинарные операторы(+, -, *, / ) для выполнения действий с дробями унарный оператор(-)//   
+//   логические операторы сравнения двух дробей(== , != , <, >, <= , >= ).
+//   Примечание : Поскольку операторы < и >= , > и <= — это логические противоположности, попробуйте перегрузить один через другой.
+//   Продемонстрировать использование перегруженных операторов.
+
+class Fraction
+{
+private:
+    int numerator;
+    int denominator;
+
+public:
+    Fraction() : numerator(1), denominator(2) // по умолчанию 1/2
+    {};
+    Fraction(int n, int d)
+    {
+        numerator = n;
+
+        if (d != 0) // если не равно 0, тогда присвоим значение в знаменатель.
+        {
+            denominator = d; 
+        }
+        else
+        {
+            cout << "the denominator cannot be equal to 0" << endl;
+        }
+    }
+    ~Fraction()
+    {};
+
+    int getNumerator()const
+    {
+        return numerator;
+    };
+
+    int getDenominator()const
+    {
+        return denominator;
+    };
+
+
+    void Print_Fraction() const
+    {
+        cout << numerator << "/" << denominator << endl;
+    }
+
+
+};    
+Fraction operator + (const  Fraction& n1, const  Fraction& n2)
+{   
+   
+     
+    if (n1.getDenominator() == n2.getDenominator()) // если знаменатель общий
+    {
+        return  Fraction(n1.getNumerator() + n2.getNumerator(), n1.getDenominator()); // складываем числитель.
+    }
+    else  // ищем НОЗ
+    {
+        
+        size_t x1, y1, x2, y2;
+
+        x1 = n1.getNumerator() * n2.getDenominator(); // 
+        x2 = n1.getDenominator() * n2.getDenominator();
+
+        y1 = n2.getNumerator() * n1.getDenominator();
+        y2 = n2.getDenominator() * n1.getDenominator();
+         
+       
+        return Fraction(x1 + y1, y2);
+
+    }
+
+ 
+}
+Fraction operator - (const  Fraction& n1, const  Fraction& n2)
+{
+    if (n1.getDenominator() == n2.getDenominator()) // если знаменатель общий
+    {
+        return  Fraction(n1.getNumerator() - n2.getNumerator(), n1.getDenominator()); // складываем числитель.
+    }
+    else  // ищем НОЗ
+    {
+
+        size_t x1, y1, x2, y2;
+
+        x1 = n1.getNumerator() * n2.getDenominator(); // 
+        x2 = n1.getDenominator() * n2.getDenominator();
+
+        y1 = n2.getNumerator() * n1.getDenominator();
+        y2 = n2.getDenominator() * n1.getDenominator();
+
+        
+        return Fraction(x1 - y1, y2);
+
+    }
+};
+Fraction operator * (const  Fraction& n1, const  Fraction& n2)
+{     
+   return  Fraction(n1.getNumerator() * n2.getNumerator(), n1.getDenominator()* n2.getDenominator()); 
+     
+};
+Fraction operator / (const  Fraction& n1, const  Fraction& n2)
+{
+    return Fraction(n1.getNumerator() * n2.getDenominator(), n1.getDenominator() * n2.getNumerator());
+};
+Fraction operator -(const  Fraction& n1)  // унарый -
+{
+    signed int x, y;
+
+    x = n1.getNumerator();
+    y = n1.getDenominator();
+    return Fraction(-x, -y);
+}; 
+bool operator == (const  Fraction& n1, const  Fraction& n2)
+{
+
+
+    if ((n1.getDenominator() == n2.getDenominator()) && (n1.getNumerator() == n2.getNumerator()))// если знаменатель общий
+    {
+        return  true;
+    }
+    else
+    {
+        return false;
+    }
+
+
+};
+bool operator != (const  Fraction& n1, const  Fraction& n2)
+{
+    if ((n1.getDenominator() != n2.getDenominator()) || (n1.getNumerator() != n2.getNumerator()))// если знаменатель общий
+    {
+        return  true;
+    }
+    else
+    {
+        return false;
+    }
+};
+bool operator > (const  Fraction& n1, const  Fraction& n2)
+{
+    if (n1.getDenominator() == n2.getDenominator()) // если знаменатель общий
+    {
+        if (n1.getNumerator() > n2.getNumerator()) 
+        { 
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (n1.getNumerator()== n2.getNumerator())
+    {
+        if (n1.getDenominator() < n2.getDenominator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        
+    }
+    else
+    {
+        if (n1.getNumerator() * n2.getDenominator() > n2.getNumerator() * n1.getDenominator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+};
+bool operator < (const  Fraction& n1, const  Fraction& n2)
+{
+    if (n1.getDenominator() == n2.getDenominator()) // если знаменатель общий
+    {
+        if (n1.getNumerator() < n2.getNumerator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (n1.getNumerator() == n2.getNumerator())
+    {
+        if (n1.getDenominator() > n2.getDenominator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+    else
+    {
+        if (n1.getNumerator() * n2.getDenominator() < n2.getNumerator() * n1.getDenominator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+};
+bool operator >= (const  Fraction& n1, const  Fraction& n2)
+{
+    if (n1.getDenominator() == n2.getDenominator()) // если знаменатель общий
+    {
+        if (n1.getNumerator() >= n2.getNumerator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (n1.getNumerator() == n2.getNumerator())
+    {
+        if (n1.getDenominator() <= n2.getDenominator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+    else
+    {
+        if (n1.getNumerator() * n2.getDenominator() >= n2.getNumerator() * n1.getDenominator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+};
+bool operator <= (const  Fraction& n1, const  Fraction& n2)
+{
+    if (n1.getDenominator() == n2.getDenominator()) // если знаменатель общий
+    {
+        if (n1.getNumerator() <= n2.getNumerator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (n1.getNumerator() == n2.getNumerator())
+    {
+        if (n1.getDenominator() >= n2.getDenominator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+    else
+    {
+        if (n1.getNumerator() * n2.getDenominator() <= n2.getNumerator() * n1.getDenominator())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+};
+
+//=============================================================================================================================================================
+//   Задание 4.
+//  Создать класс Card, описывающий карту в игре БлэкДжек. У этого класса должно быть три поля: масть, значение карты и положение карты (вверх лицом или рубашкой). 
+//  Сделать поля масть и значение карты типом перечисления (enum). Положение карты - тип bool. Также в этом классе должно быть два метода: 
+//  метод Flip(), который переворачивает карту, т.е.если она была рубашкой вверх, то он ее поворачивает лицом вверх, и наоборот.
+//  метод GetValue(), который возвращает значение карты, пока можно считать, что туз = 1.
+
+class Card
+{
+protected:
+    bool shirt; // булево shirt, елси true -- shirt(рубашкой вверх). иначе  false -- картинкой вверх.
+public:
+    enum suit {HEARTS, SPADES, CLUBS, DIAMONDS }; // Масть карты. 
+     //enum shirt { PICTURE, SHIRT };  // я не уверен, но впринципе можно сделать Положение карты тоже enum.
+    enum card_value { ACE = 1, KING = 10, Queen = 10, Jack = 10, TEN = 10, NINE = 9, EIGHT = 8, SEVEN = 7, SIX = 6, FIVE = 5, FOUR = 4, THREE = 3, TWO = 2 };
+        
+    
+    suit Suit;      // масть карты
+         //  bool shirt;    // можно тоже  enum?
+    card_value Value; // значение карты  - value
+   
+    Card(bool shi, suit sui, card_value val) : shirt(shi), Suit(sui), Value(val)
+    {};
+    ~Card()
+    {};
+
+    void Flip()
+    {
+        if (shirt == true)// рубашка = true  - рубашкой вверх  
+        {
+            shirt = false; // переварачивем картинкой вверх
+        }
+        else // было картинкой вверх
+        {
+            shirt = true;  // переварачивем  рубашкой вверх
+        }
+    };
+    card_value GetValue()
+    {
+        return Value;
+    };
+
+    void Print_card()  // Проверить что получилось.
+    {
+        cout << "shirt up?: " << shirt << endl;
+        if (Suit == 0)
+        {
+            cout << "Suit: HEARTS " << Suit << endl;
+        }
+        if (Suit == 1)
+        {
+            cout << "Suit: SPADES " << Suit << endl;
+        }
+        if (Suit == 2)
+        {
+            cout << "Suit: CLUBS " << Suit << endl;
+        }
+        if (Suit == 3)
+        {
+            cout << "Suit: DIAMONDS " << Suit << endl;
+        }
+        
+        cout << "Value: " << Value << endl;
+        cout << endl;
+        
+    };
+
+};
+
+
+
+
+int Car::namber_car = 0; // 
+
+int main()
+{
+
+    //задание 1.
+    IFigure *Plg = new Parallelogram(110, 3); 
+    area(Plg);
+    PrintFigure(Plg);
+    delete Plg;
+
+    IFigure* Rtg = new Rectangle(10.05, 20.352);
+    area(Rtg);
+    PrintFigure(Rtg);
+    delete Rtg; 
+
+    IFigure* Sqr = new Square(5.5);
+    area(Sqr);
+    PrintFigure(Sqr);
+    delete Sqr;
+
+    IFigure *Crc = new Circle(7);
+    area(Crc);
+    PrintFigure(Crc);
+    delete Crc;
+
+    cout << endl;
+    cout << "---------------------------------------------------------------" << endl;
+    //============================================================================================================================================================
+    // задагие 2.
+
+    Car* PasCar = new PassengerCar("Volvo", "cx90", 1);
+    print_vehicle_class_data(PasCar);
+    delete PasCar;
+
+    Car *bus = new Bus("Ikarus", "280", 100);
+    print_vehicle_class_data(bus);
+    delete bus;
+
+    Car* minivan = new Minivan("Volkswagen", "multivan");
+    print_vehicle_class_data(minivan);
+    delete minivan;
+
+    cout << endl;
+    cout << "---------------------------------------------------------------" << endl;
+
+    //============================================================================================================================================================
+    // задание 3.
+    bool res;
+
+    Fraction Fr1 (4, 3);
+    Fraction Fr2 (2, 5);
+    Fraction Fr3 (7, 8);
+    Fraction Fr4 (3, 8);
+    Fraction Fr5 (2, 3);
+    Fraction Fr6 (2, 3);
+
+    cout << "+" << endl;
+    Fraction result = Fr1 + Fr2;
+    cout<< Fr1.getNumerator() << "/" <<Fr1.getDenominator() << " + " << Fr2.getNumerator() << "/" << Fr2.getDenominator() << " = "<< result.getNumerator() << "/"<<result.getDenominator() << endl;
+   
+    result = Fr3 + Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " + " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << result.getNumerator() << "/" << result.getDenominator() << endl;
+    cout <<  endl;
+
+    cout << "-" << endl;
+    result = Fr3 - Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " - " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << result.getNumerator() << "/" << result.getDenominator() << endl;
+    result = Fr1 - Fr2;
+    cout << Fr1.getNumerator() << "/" << Fr1.getDenominator() << " - " << Fr2.getNumerator() << "/" << Fr2.getDenominator() << " = " << result.getNumerator() << "/" << result.getDenominator() << endl;
+    cout << endl;
+
+    cout << "*" << endl;
+    result = Fr3 * Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " * " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << result.getNumerator() << "/" << result.getDenominator() << endl;
+    result = Fr1 *  Fr2;
+    cout << Fr1.getNumerator() << "/" << Fr1.getDenominator() << " * " << Fr2.getNumerator() << "/" << Fr2.getDenominator() << " = " << result.getNumerator() << "/" << result.getDenominator() << endl;
+    cout << endl;
+
+    cout << "/" << endl;
+    result = Fr3 / Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " : " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << result.getNumerator() << "/" << result.getDenominator() << endl;
+    result = Fr1 / Fr2;
+    cout << Fr1.getNumerator() << "/" << Fr1.getDenominator() << " : " << Fr2.getNumerator() << "/" << Fr2.getDenominator() << " = " << result.getNumerator() << "/" << result.getDenominator() << endl;
+    cout << endl;
+
+    cout << "unary -" << endl;
+    result = -Fr3;
+    result.Print_Fraction();
+    result = -Fr1;
+    result.Print_Fraction();
+    cout << endl;
+
+    cout << boolalpha;
+
+
+    res = Fr3 == Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " == " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << res << endl;     
+    res = Fr5 == Fr6;
+    cout << Fr5.getNumerator() << "/" << Fr5.getDenominator() << " == " << Fr6.getNumerator() << "/" << Fr6.getDenominator() << " = " << res << endl;
+       
+    res = Fr3 != Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " != " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << res << endl;     
+    res = Fr5 != Fr6;
+    cout << Fr5.getNumerator() << "/" << Fr5.getDenominator() << " != " << Fr6.getNumerator() << "/" << Fr6.getDenominator() << " = " << res << endl;
+ 
+    res = Fr3 > Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " > " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << res << endl;
+    res = Fr5 > Fr6;
+    cout << Fr5.getNumerator() << "/" << Fr5.getDenominator() << " > " << Fr6.getNumerator() << "/" << Fr6.getDenominator() << " = " << res << endl;    
+   
+    res = Fr3 < Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " < " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << res << endl;
+    res = Fr5 < Fr6;
+    cout << Fr5.getNumerator() << "/" << Fr5.getDenominator() << " < " << Fr6.getNumerator() << "/" << Fr6.getDenominator() << " = " << res << endl;    
+    
+    res = Fr3 <= Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " <= " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << res << endl;    
+    res = Fr5 <= Fr6;
+    cout << Fr5.getNumerator() << "/" << Fr5.getDenominator() << " <= " << Fr6.getNumerator() << "/" << Fr6.getDenominator() << " = " << res << endl;   
+    
+    res = Fr3 >= Fr4;
+    cout << Fr3.getNumerator() << "/" << Fr3.getDenominator() << " >= " << Fr4.getNumerator() << "/" << Fr4.getDenominator() << " = " << res << endl;
+    res = Fr5 >= Fr6;
+    cout << Fr5.getNumerator() << "/" << Fr5.getDenominator() << " >= " << Fr6.getNumerator() << "/" << Fr6.getDenominator() << " = " << res << endl;
+    
+
+    cout << "---------------------------------------------------------------" << endl;
+    
+    //============================================================================================================================================================
+    // задание 4.
+
+    Card* card1 = new Card(false, Card::HEARTS, Card::ACE);
+    card1->Print_card();
+   
+
+    Card* card2 = new Card(true, Card::DIAMONDS, Card::KING);
+    card2->Print_card();
+    delete card2;
+
+    Card* card3 = new Card(true, Card::CLUBS, Card::TWO);
+    card3->Print_card();
+    delete card3;
+
+    Card* card4 = new Card(true, Card::SPADES, Card::NINE);
+    card4->Print_card();
+
+
+    // Получим значение card1
+    cout <<"card1 value: " << card1->GetValue();
+
+    delete card1;
+    delete card4;
+
+
+
+}   
+
