@@ -1,0 +1,276 @@
+// OOP_lesson_4.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+//
+
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <algorithm>
+#include <cassert>
+using namespace std;
+
+
+class ArrayInt
+{
+private:
+	int m_length;
+	int* m_data;
+
+public:
+	ArrayInt() : m_length(0), m_data(nullptr) {};
+	ArrayInt(int lenght) : m_length(lenght), m_data(nullptr)
+	{
+		assert(lenght >= 0);
+		if (lenght > 0)
+		{
+			m_data = new int[lenght];
+		}
+		else
+		{
+			m_data = nullptr;
+		}
+	};
+
+	~ArrayInt()
+	{
+		delete[] m_data;
+	};
+
+	void erase()
+	{
+		delete[]m_data;
+		m_data = nullptr;
+		m_length = 0;
+	};
+
+	
+
+	int getLenght(int index) const
+	{
+		return m_length;
+	}
+
+	int& operator [] (int index)
+	{
+		assert(index >= 0 && index < m_length);
+		return m_data[index];
+	}
+
+	void resize(int newLength)
+	{
+		if (newLength == m_length)
+			return;
+		if (newLength <= 0)
+		{
+			erase();
+			return;
+		}
+		int* data = new int[newLength];
+		if (m_length > 0)
+		{
+			int elentstocopy = (newLength > m_length) ? m_length : newLength;
+			for (int index = 0; index < elentstocopy; index++)
+				data[index] = m_data[index];
+
+		}
+		delete[] m_data;
+		m_data = data;
+		m_length = newLength;
+	};
+
+	void insertBefore(int value, int index)
+	{
+		// Проверка корректности передаваемого индекса
+		assert(index >= 0 && index <= m_length);
+
+		// Создаем новый массив на один элемент больше старого массива
+		int* data = new int[m_length + 1];
+
+		// Копируем все элементы до index-а
+		for (int before = 0; before < index; ++before)
+			data[before] = m_data[before];
+
+		// Вставляем новый элемент в новый массив
+		data[index] = value;
+
+		// Копируем все значения после вставляемого элемента
+		for (int after = index; after < m_length; ++after)
+			data[after + 1] = m_data[after];
+
+		// Удаляем старый массив и используем вместо него новый 
+		delete[] m_data;
+		m_data = data;
+		++m_length;
+	}
+
+	void push_back(int value) { insertBefore(value, m_length); }
+
+	// Задание 1. =============================================================================================================
+	// Добавить в контейнерный класс, который был написан в этом уроке, методы:
+	// для удаления последнего элемента массива(аналог функции pop_back() в векторах)
+	// для удаления первого элемента массива(аналог pop_front() в векторах)
+	// для сортировки массива
+	// для вывода на экран элементов.
+
+	void pop_back() // необходимо удалить последний эл-т массива. 
+	{
+		// Создаем новый массив на один элемент меньше старого массива
+		assert(m_length > 0);
+		int* data = new int[m_length - 1];
+
+		// берем и копируем все эл-ты старого массива кроме последнего в новый
+		for (int before = 0; before < m_length -1; ++before)
+			data[before] = m_data[before];
+		// Удаляем старый массив и используем вместо него новый 
+		delete[] m_data;
+		m_data = data;
+		--m_length;
+
+	};
+
+	void pop_front() // необходимо удалить первый эл-т массива.
+	{
+		assert(m_length > 0); 
+		int* data = new int[m_length - 1]; // тоже самое - новый массив -1 эл.
+		int now = 0;
+
+		for (int before = 1; before < m_length; ++before)
+		{
+		
+			// переносим из старого в новый начиная с 1 - го индекса.
+				data[now] = m_data[before];
+				now++;
+		}
+
+		delete[] m_data;
+		m_data = data;
+		--m_length;
+
+	};
+
+	void print_arr()// для вывода на экран элементов.
+	{
+		for (size_t i = 0; i < m_length; i++)
+			cout << m_data[i] << " " << endl;
+	}; 
+
+	void arr_sort()
+	{
+		int temp; // временная переменная для обмена элементов местами
+
+// Сортировка массива пузырьком
+		for (int i = 0; i < m_length - 1; i++) {
+			for (int j = 0; j < m_length - i - 1; j++) {
+				if (m_data[j] > m_data[j + 1]) {
+					// меняем элементы местами
+					temp = m_data[j];
+					m_data[j] = m_data[j + 1];
+					m_data[j + 1] = temp;
+				}
+			}
+		}
+	};
+
+};
+
+//  Задание 3. =============================================================================================================
+//  РЕализовано в BlackJackGame
+
+
+
+
+
+
+
+int main()
+
+{	// Задание 1. =============================================================================================================
+	int size =5;
+	int n = 1;
+	ArrayInt ARR (size); // вот тут не понятно как правильно. наш конструктор ожидает длину int lenght
+	
+	for (size_t i = 0; i < size; i++)  // поэтому эл. массива я заполнил так
+	{		
+		ARR[i] = n;
+		n++;
+	};
+
+	ARR.print_arr();
+	
+	cout <<"---------"<< endl;
+	ARR.pop_back();  //удалим последний эл-т массива.
+	ARR.print_arr();
+
+	cout << "---------" << endl;
+
+	ARR.pop_front();  //удалим последний эл-т массива.
+	ARR.print_arr();
+
+	
+
+	ArrayInt ARR1(size);// вот тут не понятно как правильно. наш конструктор ожидает длину (int lenght)
+	// поэтому эл. массива я заполнил так
+	ARR1[0] = 4;
+	ARR1[1] = 1;
+	ARR1[2] = 16;
+	ARR1[3] = 7;
+	ARR1[4] = 3;
+	cout << "---------" << endl;
+	ARR1.print_arr();
+	cout << "---------sort" << endl;
+	ARR1.arr_sort();
+
+	ARR1.print_arr();
+	cout << "---------" << endl;
+
+	// Задание 2. =============================================================================================================
+	// Дан вектор чисел, требуется выяснить, сколько среди них различных. Постараться использовать максимально быстрый алгоритм.
+
+	vector <int > v{ 1,1,2,2}; // Дан вектор чисел.
+
+	vector<int>::const_iterator it; // введем итератор
+
+	it = v.begin(); // возвращает на начало массива.
+
+	
+
+
+
+	
+
+	int x = 0; // для подсчета
+	int z = 0; // для того чтобы не проверять тотже элемент.
+
+	for (it = v.begin(); it != v.end(); it++, z++) // в цикле от начала до конца 
+	{	
+		
+		for (int i=0; i < v.size(); i++)
+		{
+			
+			if (z != i )
+			{
+				if (*it == v[i])  // если встретили тоже значение прекращаем. 
+					break;
+			}
+			
+
+			
+			
+			if (i == v.size()-1) // а если 
+				x++;
+		}
+		
+
+		
+	}
+	;
+	cout << endl;
+	cout <<"various: "<< x << endl; // Показывает сколько различных эл. в векторе. 
+	cout << "---------" << endl;
+
+
+	
+	
+	
+	return 0; 
+	
+}
